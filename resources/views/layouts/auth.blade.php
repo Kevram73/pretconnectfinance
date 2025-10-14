@@ -1,88 +1,215 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'PretConnectLoan - Authentification')</title>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>@yield('title', 'PretConnect Financial')</title>
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'binance-black': '#0b0e11',
-                        'binance-dark': '#161a1e',
-                        'binance-darker': '#1e2329',
-                        'binance-gray': '#2b3139',
-                        'binance-light-gray': '#474d57',
-                        'binance-yellow': '#f0b90b',
-                        'binance-yellow-hover': '#f8d12d',
-                        'binance-green': '#02c076',
-                        'binance-red': '#f84960',
-                        'binance-blue': '#1890ff',
-                        'text-primary': '#eaecef',
-                        'text-secondary': '#848e9c',
-                        'text-tertiary': '#5e6673',
-                        'border-color': '#2b3139',
-                        'border-hover': '#474d57',
-                    }
-                }
-            }
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f2e 100%);
+            position: relative;
+            overflow: hidden;
         }
-    </script>
+        
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23FFD700" opacity="0.05"/><circle cx="75" cy="75" r="1" fill="%23FFA500" opacity="0.03"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .auth-logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        .auth-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .auth-form .btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .auth-links {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .auth-links a {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .floating-shapes .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-gold), var(--secondary-gold));
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-shapes .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .floating-shapes .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+        
+        .floating-shapes .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        .alert {
+            background: var(--card-bg);
+            border: 1px solid;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .alert-success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        .alert-danger {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+    </style>
     
     @yield('styles')
 </head>
-<body class="min-h-screen bg-gradient-to-br from-binance-black to-binance-dark flex items-center justify-center text-text-primary">
-    <div class="w-full max-w-md mx-4">
-        <div class="bg-binance-dark border border-binance-yellow rounded-2xl shadow-2xl shadow-binance-yellow/10 overflow-hidden">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-binance-darker to-binance-dark border-b border-binance-yellow p-8 text-center">
-                <div class="flex items-center justify-center mb-4">
-                    <div class="w-12 h-12 bg-binance-yellow rounded-lg flex items-center justify-center mr-3">
-                        <i class="fas fa-coins text-xl text-binance-black"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-binance-yellow">PretConnectLoan</h3>
+<body>
+    <div class="auth-container">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        
+        <div class="auth-card fade-in-up">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-coins"></i> PretConnect
                 </div>
-                <p class="text-text-secondary">@yield('auth-subtitle', 'Plateforme d\'investissement')</p>
+                <p class="auth-subtitle">@yield('subtitle', 'Plateforme d\'investissement financier')</p>
             </div>
             
-            <!-- Body -->
-            <div class="p-8">
-                <!-- Flash Messages -->
-                @if(session('success'))
-                    <div class="mb-6 p-4 bg-green-500/10 border border-green-500 rounded-lg text-green-500 flex items-center">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        {{ session('success') }}
+            <!-- Alerts -->
+            @if(session('success'))
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+            
+            @if(session('error'))
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ session('error') }}
+                </div>
+            @endif
+            
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
                     </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500 flex items-center">
-                        <i class="fas fa-exclamation-circle mr-2"></i>
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="mb-6 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <ul class="list-disc list-inside">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                @yield('content')
-            </div>
+                </div>
+            @endif
+            
+            @yield('content')
         </div>
     </div>
     

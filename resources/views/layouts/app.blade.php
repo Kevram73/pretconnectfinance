@@ -1,167 +1,177 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'PretConnectLoan')</title>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>@yield('title', 'PretConnect Financial')</title>
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'binance-black': '#0b0e11',
-                        'binance-dark': '#161a1e',
-                        'binance-darker': '#1e2329',
-                        'binance-gray': '#2b3139',
-                        'binance-light-gray': '#474d57',
-                        'binance-yellow': '#f0b90b',
-                        'binance-yellow-hover': '#f8d12d',
-                        'binance-green': '#02c076',
-                        'binance-red': '#f84960',
-                        'binance-blue': '#1890ff',
-                        'text-primary': '#eaecef',
-                        'text-secondary': '#848e9c',
-                        'text-tertiary': '#5e6673',
-                        'border-color': '#2b3139',
-                        'border-hover': '#474d57',
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <!-- Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
 </head>
-<body class="bg-binance-black text-text-primary font-sans">
-            <!-- Sidebar -->
-    <nav class="fixed left-0 top-0 h-screen w-60 bg-binance-dark border-r border-border-color z-50 transition-all duration-300">
-        <div class="flex items-center p-4 border-b border-border-color mb-4">
-            <div class="w-8 h-8 bg-binance-yellow rounded-md flex items-center justify-center mr-3 font-bold text-binance-black">
-                P
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="{{ route('dashboard') }}" class="logo">
+                <i class="fas fa-coins"></i> PretConnect
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a></li>
+                <li><a href="{{ route('investments.index') }}" class="nav-link">Investissements</a></li>
+                <li><a href="{{ route('transactions.index') }}" class="nav-link">Transactions</a></li>
+                <li><a href="{{ route('dashboard.referrals') }}" class="nav-link">Équipe</a></li>
+            </ul>
+            
+            <div class="nav-user">
+                <div class="user-balance">
+                    <span class="text-muted">Solde:</span>
+                    <span class="text-gold font-weight-bold">${{ auth()->user()->wallet->balance ?? '0.00' }}</span>
+                </div>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle">
+                        <i class="fas fa-user"></i>
+                        {{ auth()->user()->name }}
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="{{ route('dashboard.profile') }}" class="dropdown-item">
+                            <i class="fas fa-user-edit"></i> Profil
+                        </a>
+                        <a href="{{ route('logout') }}" class="dropdown-item" 
+                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="fas fa-sign-out-alt"></i> Déconnexion
+                        </a>
+                    </div>
+                </div>
+                
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
             </div>
-            <div class="text-lg font-bold text-text-primary">PretConnect</div>
-                    </div>
-                    
-        <ul class="space-y-1 px-2">
-            <li>
-                <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 {{ request()->routeIs('dashboard') ? 'text-binance-yellow bg-binance-darker font-semibold' : '' }}">
-                    <i class="fas fa-tachometer-alt w-5 mr-3 text-center"></i>
-                                Dashboard
-                            </a>
-                        </li>
-            <li>
-                <a href="{{ route('transactions') }}" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 {{ request()->routeIs('transactions*') ? 'text-binance-yellow bg-binance-darker font-semibold' : '' }}">
-                    <i class="fas fa-exchange-alt w-5 mr-3 text-center"></i>
-                                Transactions
-                            </a>
-                        </li>
-            <li>
-                <a href="{{ route('investments') }}" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 {{ request()->routeIs('investments*') ? 'text-binance-yellow bg-binance-darker font-semibold' : '' }}">
-                    <i class="fas fa-chart-line w-5 mr-3 text-center"></i>
-                                Investissements
-                            </a>
-                        </li>
-            <li>
-                <a href="{{ route('commissions') }}" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 {{ request()->routeIs('commissions') ? 'text-binance-yellow bg-binance-darker font-semibold' : '' }}">
-                    <i class="fas fa-percentage w-5 mr-3 text-center"></i>
-                                Commissions
-                            </a>
-                        </li>
-            <li>
-                <a href="{{ route('team-rewards') }}" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 {{ request()->routeIs('team-rewards') ? 'text-binance-yellow bg-binance-darker font-semibold' : '' }}">
-                    <i class="fas fa-trophy w-5 mr-3 text-center"></i>
-                                Récompenses Équipe
-                            </a>
-                        </li>
-            <li>
-                <a href="{{ route('referrals') }}" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 {{ request()->routeIs('referrals') ? 'text-binance-yellow bg-binance-darker font-semibold' : '' }}">
-                    <i class="fas fa-users w-5 mr-3 text-center"></i>
-                                Parrainages
-                            </a>
-                        </li>
-            <li>
-                <a href="{{ route('profile') }}" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 {{ request()->routeIs('profile') ? 'text-binance-yellow bg-binance-darker font-semibold' : '' }}">
-                    <i class="fas fa-user w-5 mr-3 text-center"></i>
-                                Profil
-                            </a>
-                        </li>
-                        
-                        @if(auth()->user()->isAdmin())
-            <hr class="border-border-color my-4">
-            <li>
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 {{ request()->routeIs('admin.*') ? 'text-binance-yellow bg-binance-darker font-semibold' : '' }}">
-                    <i class="fas fa-cog w-5 mr-3 text-center"></i>
-                                Administration
-                            </a>
-                        </li>
-                        @endif
-                        
-            <hr class="border-border-color my-4">
-            <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                    <button type="submit" class="flex items-center px-4 py-3 text-text-secondary hover:text-text-primary hover:bg-binance-darker rounded-md transition-all duration-200 w-full text-left">
-                        <i class="fas fa-sign-out-alt w-5 mr-3 text-center"></i>
-                                    Déconnexion
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-            </nav>
-
-            <!-- Main content -->
-    <main class="ml-60 min-h-screen bg-binance-black">
-        <!-- Top Navigation -->
-        <div class="sticky top-0 z-40 bg-binance-dark border-b border-border-color px-6 py-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-xl font-semibold text-text-primary">@yield('page-title', 'Dashboard')</h1>
-                <div class="flex items-center">
-                    <div class="w-8 h-8 bg-binance-yellow rounded-full flex items-center justify-center mr-3 font-semibold text-xs text-binance-black">
-                        {{ substr(auth()->user()->full_name, 0, 1) }}
-                    </div>
-                    <span class="text-text-secondary">{{ auth()->user()->full_name }}</span>
-                </div>
-                    </div>
-                </div>
-
-        <!-- Content Wrapper -->
-        <div class="p-6">
-                <!-- Flash Messages -->
-                @if(session('success'))
-                <div class="mb-4 p-4 bg-green-500/10 border border-green-500 rounded-lg text-green-500 flex items-center">
-                    <i class="fas fa-check-circle mr-2"></i>
-                        {{ session('success') }}
-                    </div>
-                @endif
-
-                @if(session('error'))
-                <div class="mb-4 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500 flex items-center">
-                    <i class="fas fa-exclamation-circle mr-2"></i>
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                @if($errors->any())
-                <div class="mb-4 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    <ul class="list-disc list-inside">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                @yield('content')
         </div>
-    </main>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="app-layout">
+        @if(isset($sidebar) && $sidebar)
+            <aside class="sidebar">
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item">
+                        <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                            <i class="fas fa-tachometer-alt sidebar-icon"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('investments.index') }}" class="sidebar-link {{ request()->routeIs('investments.*') ? 'active' : '' }}">
+                            <i class="fas fa-chart-line sidebar-icon"></i>
+                            Investissements
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('transactions.index') }}" class="sidebar-link {{ request()->routeIs('transactions.*') ? 'active' : '' }}">
+                            <i class="fas fa-exchange-alt sidebar-icon"></i>
+                            Transactions
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('dashboard.commissions') }}" class="sidebar-link {{ request()->routeIs('dashboard.commissions') ? 'active' : '' }}">
+                            <i class="fas fa-percentage sidebar-icon"></i>
+                            Commissions
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('dashboard.referrals') }}" class="sidebar-link {{ request()->routeIs('dashboard.referrals') ? 'active' : '' }}">
+                            <i class="fas fa-users sidebar-icon"></i>
+                            Équipe
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ route('dashboard.team-rewards') }}" class="sidebar-link {{ request()->routeIs('dashboard.team-rewards') ? 'active' : '' }}">
+                            <i class="fas fa-trophy sidebar-icon"></i>
+                            Récompenses
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+        @endif
+        
+        <main class="main-content" style="margin-left: {{ isset($sidebar) && $sidebar ? '280px' : '0' }}; padding: 2rem;">
+            <!-- Alerts -->
+            @if(session('success'))
+                <div class="alert alert-success fade-in-up">
+                    <i class="fas fa-check-circle"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+            
+            @if(session('error'))
+                <div class="alert alert-danger fade-in-up">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ session('error') }}
+                </div>
+            @endif
+            
+            @if ($errors->any())
+                <div class="alert alert-danger fade-in-up">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <ul class="mb-0 mt-2">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
+            <!-- Page Content -->
+            @yield('content')
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const dropdown = this.parentElement;
+                    const menu = dropdown.querySelector('.dropdown-menu');
+                    
+                    // Close other dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                        if (menu !== this.nextElementSibling) {
+                            menu.style.display = 'none';
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                        menu.style.display = 'none';
+                    });
+                }
+            });
+        });
+    </script>
     
     @yield('scripts')
 </body>

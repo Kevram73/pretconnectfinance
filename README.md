@@ -7,60 +7,258 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+# 🏆 PretConnect Financial
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Plateforme d'investissement financier avec système de parrainage multi-niveaux**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Une application Laravel moderne avec un design inspiré d'Upwork utilisant une palette noir et doré pour une expérience utilisateur premium.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+![Laravel](https://img.shields.io/badge/Laravel-10.x-red?style=for-the-badge&logo=laravel)
+![PHP](https://img.shields.io/badge/PHP-8.1+-blue?style=for-the-badge&logo=php)
+![MySQL](https://img.shields.io/badge/MySQL-8.0+-orange?style=for-the-badge&logo=mysql)
 
-## Learning Laravel
+## ✨ Fonctionnalités
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 💰 **Gestion Financière**
+- Portefeuilles utilisateurs avec transactions en temps réel
+- Plans d'investissement multiples avec rendements variables
+- Système de dépôt et retrait sécurisé
+- Historique complet des transactions
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 🎯 **Système MLM Avancé**
+- Commissions de parrainage multi-niveaux
+- Récompenses d'équipe basées sur la performance
+- Tableau de bord analytique pour les parrains
+- Bonus et challenges mensuels
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 👥 **Interface Utilisateur**
+- Design moderne inspiré d'Upwork
+- Palette noir et doré pour un look premium
+- Dashboard interactif avec graphiques en temps réel
+- Interface responsive et accessible
 
-## Laravel Sponsors
+### 🔐 **Sécurité & Administration**
+- Authentification sécurisée avec middleware
+- Panel administrateur complet
+- Logs et audit trails
+- Protection CSRF et validation stricte
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Installation Rapide
 
-### Premium Partners
+### Prérequis
+- **PHP** 8.1 ou supérieur
+- **Composer** 2.x
+- **Node.js** 18.x ou supérieur
+- **MySQL** 8.0 ou supérieur
+- **Git**
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 1. Cloner le Projet
+```bash
+git clone https://github.com/votre-repo/pretconnectfinanc.git
+cd pretconnectfinanc
+```
 
-## Contributing
+### 2. Installation des Dépendances
+```bash
+# Dépendances PHP
+composer install
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Dépendances JavaScript
+npm install
+```
 
-## Code of Conduct
+### 3. Configuration de l'Environnement
+```bash
+# Copier le fichier d'environnement
+copy .env.example .env
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Générer la clé d'application
+php artisan key:generate
+```
 
-## Security Vulnerabilities
+### 4. Configuration de la Base de Données
+Éditez le fichier `.env` avec vos paramètres MySQL :
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=pretconnect_financial
+DB_USERNAME=root
+DB_PASSWORD=votre_mot_de_passe
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Créer la Base de Données
+```bash
+# Créer la base de données
+mysql -u root -p -e "CREATE DATABASE pretconnect_financial CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-## License
+# Exécuter les migrations
+php artisan migrate
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Peupler avec des données de test
+php artisan db:seed
+```
+
+### 6. Compilation des Assets
+```bash
+# Développement
+npm run dev
+
+# Production
+npm run build
+```
+
+### 7. Démarrer le Serveur
+```bash
+# Serveur Laravel
+php artisan serve
+
+# Compilation en temps réel (nouveau terminal)
+npm run dev
+```
+
+🎉 **Votre application est maintenant accessible sur** `http://localhost:8000`
+
+## 👤 Comptes de Test
+
+### Administrateur
+- **Email :** admin@pretconnect.financial
+- **Mot de passe :** admin123
+
+### Utilisateur Test
+- **Email :** user@example.com
+- **Mot de passe :** password
+
+## 📱 Fonctionnalités par Page
+
+### 🏠 **Dashboard Utilisateur**
+- Vue d'ensemble des investissements
+- Graphiques de performance
+- Statistiques de l'équipe
+- Activité récente
+
+### 💹 **Investissements**
+- Catalogue des plans disponibles
+- Historique des investissements
+- Calculateur de rendements
+- Gestion des renouvellements
+
+### 💳 **Transactions**
+- Dépôts par virement/carte
+- Demandes de retrait
+- Historique complet
+- Statuts en temps réel
+
+### 👥 **Équipe & Parrainage**
+- Arbre généalogique
+- Commissions gagnées
+- Statistiques de l'équipe
+- Outils de parrainage
+
+### ⚙️ **Administration**
+- Gestion des utilisateurs
+- Configuration des plans
+- Suivi des transactions
+- Rapports analytiques
+
+## 🛠️ Commandes Utiles
+
+```bash
+# Vider le cache
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+
+# Optimisation pour la production
+php artisan optimize
+
+# Créer un nouvel utilisateur admin
+php artisan make:user --admin
+
+# Backup de la base de données
+php artisan backup:run
+
+# Tests
+php artisan test
+```
+
+## 🎨 Personnalisation du Design
+
+### Variables CSS Principales
+```css
+:root {
+    --primary-gold: #FFD700;
+    --secondary-gold: #FFA500;
+    --dark-bg: #0D1117;
+    --card-bg: #161B22;
+    --border-color: #30363D;
+}
+```
+
+### Modification des Couleurs
+1. Éditez `resources/css/app.css`
+2. Modifiez les variables CSS
+3. Recompilez avec `npm run dev`
+
+## 📊 Structure de la Base de Données
+
+### Tables Principales
+- **users** - Comptes utilisateurs
+- **wallets** - Portefeuilles et soldes
+- **plans** - Plans d'investissement
+- **investments** - Investissements actifs
+- **transactions** - Mouvements financiers
+- **commissions** - Commissions gagnées
+- **team_rewards** - Récompenses d'équipe
+
+## 🔒 Sécurité
+
+### Mesures Implémentées
+- ✅ Authentification Laravel Sanctum
+- ✅ Validation CSRF sur tous les formulaires
+- ✅ Middleware de protection des routes
+- ✅ Chiffrement des mots de passe (bcrypt)
+- ✅ Validation stricte des données
+- ✅ Logs des activités sensibles
+
+### Recommandations
+- 🔐 Utilisez HTTPS en production
+- 🔑 Changez les clés secrètes
+- 📝 Activez les logs détaillés
+- 🛡️ Configurez un firewall
+- 📧 Surveillez les alertes email
+
+## 📈 Performance
+
+### Optimisations Incluses
+- ⚡ Cache des vues Blade
+- 🗄️ Cache des configurations
+- 📊 Requêtes optimisées avec Eloquent
+- 🎯 Lazy loading des relations
+- 📱 Assets compressés et minifiés
+
+## 🤝 Contribution
+
+1. **Fork** le projet
+2. **Créer** une branche feature (`git checkout -b feature/AmazingFeature`)
+3. **Commit** vos changements (`git commit -m 'Add AmazingFeature'`)
+4. **Push** vers la branche (`git push origin feature/AmazingFeature`)
+5. **Ouvrir** une Pull Request
+
+## 📞 Support
+
+- 📧 **Email :** support@pretconnect.financial
+- 📱 **Téléphone :** +33 1 23 45 67 89
+- 💬 **Discord :** [Rejoindre notre serveur](https://discord.gg/pretconnect)
+- 📚 **Documentation :** [docs.pretconnect.financial](https://docs.pretconnect.financial)
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+---
+
+<div align="center">
+  <strong>Développé avec ❤️ par l'équipe PretConnect Financial</strong><br>
+  <em>Votre réussite financière, notre engagement</em>
+</div>

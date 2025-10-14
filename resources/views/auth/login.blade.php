@@ -1,77 +1,166 @@
 @extends('layouts.auth')
 
-@section('title', 'Connexion - PretConnectLoan')
-@section('auth-subtitle', 'Connectez-vous à votre compte')
+@section('title', 'Connexion - PretConnect Financial')
+@section('subtitle', 'Connectez-vous à votre compte')
 
 @section('content')
-<form method="POST" action="{{ route('login') }}">
+<form method="POST" action="{{ route('login') }}" class="auth-form">
     @csrf
     
-    <div class="mb-6">
-        <label for="email" class="block text-text-primary font-semibold mb-2">Adresse email</label>
-        <input type="email" 
-               class="w-full bg-binance-darker border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder-text-tertiary focus:border-binance-yellow focus:ring-2 focus:ring-binance-yellow/20 transition-colors @error('email') border-binance-red @enderror" 
-               id="email" name="email" value="{{ old('email') }}" 
-               placeholder="votre@email.com" required autofocus>
+    <div class="form-group">
+        <label for="email" class="form-label">
+            <i class="fas fa-envelope"></i>
+            Adresse email
+        </label>
+        <input id="email" 
+               type="email" 
+               class="form-control @error('email') is-invalid @enderror" 
+               name="email" 
+               value="{{ old('email') }}" 
+               required 
+               autocomplete="email" 
+               autofocus
+               placeholder="votre@email.com">
         @error('email')
-            <div class="text-binance-red text-sm mt-1">{{ $message }}</div>
+            <span class="invalid-feedback">{{ $message }}</span>
         @enderror
     </div>
 
-    <div class="mb-6">
-        <label for="password" class="block text-text-primary font-semibold mb-2">Mot de passe</label>
-        <input type="password" 
-               class="w-full bg-binance-darker border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder-text-tertiary focus:border-binance-yellow focus:ring-2 focus:ring-binance-yellow/20 transition-colors @error('password') border-binance-red @enderror" 
-               id="password" name="password" placeholder="Votre mot de passe" required>
+    <div class="form-group">
+        <label for="password" class="form-label">
+            <i class="fas fa-lock"></i>
+            Mot de passe
+        </label>
+        <div class="password-field">
+            <input id="password" 
+                   type="password" 
+                   class="form-control @error('password') is-invalid @enderror" 
+                   name="password" 
+                   required 
+                   autocomplete="current-password"
+                   placeholder="••••••••">
+            <button type="button" class="password-toggle" onclick="togglePassword()">
+                <i class="fas fa-eye" id="password-icon"></i>
+            </button>
+        </div>
         @error('password')
-            <div class="text-binance-red text-sm mt-1">{{ $message }}</div>
+            <span class="invalid-feedback">{{ $message }}</span>
         @enderror
     </div>
 
-    <div class="mb-6 flex justify-between items-center">
-        <div class="flex items-center">
-            <input type="checkbox" 
-                   class="w-4 h-4 bg-binance-darker border-border-color rounded focus:ring-binance-yellow focus:ring-2 text-binance-yellow" 
-                   id="remember" name="remember">
-            <label for="remember" class="ml-2 text-text-secondary text-sm">
+    <div class="form-group">
+        <label class="form-check">
+            <input class="form-check-input" 
+                   type="checkbox" 
+                   name="remember" 
+                   id="remember" 
+                   {{ old('remember') ? 'checked' : '' }}>
+            <span class="form-check-label">
                 Se souvenir de moi
-            </label>
-        </div>
-        <a href="#" class="text-binance-yellow hover:text-binance-yellow-hover text-sm font-medium transition-colors">
-            Mot de passe oublié ?
-        </a>
+            </span>
+        </label>
     </div>
 
-    <div class="mb-6">
-        <button type="submit" class="w-full bg-binance-yellow text-binance-black py-3 px-6 rounded-lg font-semibold hover:bg-binance-yellow-hover transition-colors flex items-center justify-center">
-            <i class="fas fa-sign-in-alt mr-2"></i>
-            Se connecter
-        </button>
-    </div>
-
-    <div class="relative mb-6">
-        <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-border-color"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-            <span class="px-2 bg-binance-dark text-text-secondary">Ou</span>
-        </div>
-    </div>
-
-    <div class="mb-6">
-        <button type="button" class="w-full bg-transparent border border-border-color text-text-primary py-3 px-6 rounded-lg font-medium hover:bg-binance-darker hover:border-border-hover transition-colors flex items-center justify-center">
-            <i class="fas fa-users mr-2"></i>
-            Se connecter avec un code de parrainage
-        </button>
-    </div>
-
-    <div class="text-center">
-        <p class="text-text-secondary text-sm">
-            Pas encore de compte ? 
-            <a href="{{ route('register') }}" class="text-binance-yellow hover:text-binance-yellow-hover font-medium transition-colors">
-                Créer un compte
-            </a>
-        </p>
-    </div>
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-sign-in-alt"></i>
+        Se connecter
+    </button>
 </form>
+
+<div class="auth-links">
+    <p class="text-muted mb-3">Pas encore de compte ?</p>
+    <a href="{{ route('register') }}" class="btn btn-outline">
+        <i class="fas fa-user-plus"></i>
+        Créer un compte
+    </a>
+    
+    @if (Route::has('password.request'))
+        <div class="mt-3">
+            <a href="{{ route('password.request') }}">
+                Mot de passe oublié ?
+            </a>
+        </div>
+    @endif
+</div>
+@endsection
+
+@section('styles')
+<style>
+    .password-field {
+        position: relative;
+    }
+    
+    .password-toggle {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0;
+        font-size: 1rem;
+    }
+    
+    .password-toggle:hover {
+        color: var(--primary-gold);
+    }
+    
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+    
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary-gold);
+    }
+    
+    .form-check-label {
+        user-select: none;
+        color: var(--text-secondary);
+    }
+    
+    .invalid-feedback {
+        color: var(--warning);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: block;
+    }
+    
+    .is-invalid {
+        border-color: var(--warning) !important;
+    }
+</style>
+@endsection
+
+@section('scripts')
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById('password');
+        const passwordIcon = document.getElementById('password-icon');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            passwordIcon.classList.remove('fa-eye');
+            passwordIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            passwordIcon.classList.remove('fa-eye-slash');
+            passwordIcon.classList.add('fa-eye');
+        }
+    }
+    
+    // Auto-focus first input with error
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstError = document.querySelector('.is-invalid');
+        if (firstError) {
+            firstError.focus();
+        }
+    });
+</script>
 @endsection
