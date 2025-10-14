@@ -20,7 +20,9 @@ use App\Http\Controllers\Web\AdminController;
 
 // Public routes
 Route::get('/', function () {
-    return view('welcome');
+    $standardPlans = \App\Models\Plan::where('is_rapid', false)->get();
+    $rapidPlans = \App\Models\Plan::where('is_rapid', true)->get();
+    return view('welcome', compact('standardPlans', 'rapidPlans'));
 });
 
 // Authentication routes
@@ -72,9 +74,11 @@ Route::middleware(['auth', 'active.user', 'admin'])->prefix('admin')->name('admi
     
     // Users management
     Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
     Route::get('/users/{user}', [AdminController::class, 'user'])->name('users.show');
     Route::get('/users/{user}/json', [AdminController::class, 'showUser'])->name('users.json');
     Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
     
     // Transactions management
     Route::get('/transactions', [AdminController::class, 'transactions'])->name('transactions');
@@ -96,4 +100,14 @@ Route::middleware(['auth', 'active.user', 'admin'])->prefix('admin')->name('admi
     Route::get('/commissions', [AdminController::class, 'commissions'])->name('commissions');
     Route::get('/commissions/{commission}/json', [AdminController::class, 'showCommission'])->name('commissions.json');
     Route::put('/commissions/{commission}', [AdminController::class, 'updateCommission'])->name('commissions.update');
+    
+    // Team rewards management
+    Route::get('/team-rewards', [AdminController::class, 'teamRewards'])->name('team-rewards');
+    Route::get('/team-rewards/{teamReward}/json', [AdminController::class, 'showTeamReward'])->name('team-rewards.json');
+    Route::put('/team-rewards/{teamReward}', [AdminController::class, 'updateTeamReward'])->name('team-rewards.update');
+    
+    // Wallets management
+    Route::get('/wallets', [AdminController::class, 'wallets'])->name('wallets');
+    Route::get('/wallets/{wallet}/json', [AdminController::class, 'showWallet'])->name('wallets.json');
+    Route::put('/wallets/{wallet}', [AdminController::class, 'updateWallet'])->name('wallets.update');
 });

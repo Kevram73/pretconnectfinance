@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('team_rewards', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->integer('level');
             $table->string('title');
             $table->integer('required_directs');

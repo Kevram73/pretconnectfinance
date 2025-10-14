@@ -1,38 +1,25 @@
 @extends('layouts.app')
 
-@section('title', 'Transactions - PretConnectLoan')
-@section('page-title', 'Mes Transactions')
+@section('title', 'Transactions')
 
 @section('content')
-<!-- Filter Buttons -->
-<div class="row mb-4">
+<div class="container-fluid">
+    <div class="row">
     <div class="col-12">
-        <div class="btn-group" role="group">
-            <a href="{{ route('transactions') }}" class="btn btn-outline-primary {{ !request('type') && !request('status') ? 'active' : '' }}">
-                Toutes
-            </a>
-            <a href="{{ route('transactions', ['type' => 'DEPOSIT']) }}" class="btn btn-outline-success {{ request('type') === 'DEPOSIT' ? 'active' : '' }}">
-                Dépôts
-            </a>
-            <a href="{{ route('transactions', ['type' => 'WITHDRAWAL']) }}" class="btn btn-outline-warning {{ request('type') === 'WITHDRAWAL' ? 'active' : '' }}">
-                Retraits
-            </a>
-            <a href="{{ route('transactions', ['type' => 'INVESTMENT']) }}" class="btn btn-outline-info {{ request('type') === 'INVESTMENT' ? 'active' : '' }}">
-                Investissements
-            </a>
-            <a href="{{ route('transactions', ['status' => 'PENDING']) }}" class="btn btn-outline-secondary {{ request('status') === 'PENDING' ? 'active' : '' }}">
-                En Attente
-            </a>
-        </div>
+            <div class="page-title-box">
+                <h4 class="page-title">
+                    <i class="fas fa-exchange-alt me-2"></i>Mes Transactions
+                </h4>
+            </div>
     </div>
 </div>
 
-<!-- Transactions Table -->
+    <div class="row">
+        <div class="col-12">
 <div class="card">
     <div class="card-header">
         <h5 class="card-title mb-0">
-            <i class="fas fa-history me-2"></i>
-            Historique des Transactions
+                        <i class="fas fa-list me-2"></i>Historique des Transactions
         </h5>
     </div>
     <div class="card-body">
@@ -53,23 +40,74 @@
                         @foreach($transactions as $transaction)
                         <tr>
                             <td>
-                                <span class="badge bg-{{ $transaction->type === 'DEPOSIT' ? 'success' : ($transaction->type === 'WITHDRAWAL' ? 'warning' : ($transaction->type === 'INVESTMENT' ? 'primary' : 'info')) }}">
-                                    <i class="fas fa-{{ $transaction->type === 'DEPOSIT' ? 'arrow-down' : ($transaction->type === 'WITHDRAWAL' ? 'arrow-up' : 'chart-line') }} me-1"></i>
-                                    {{ $transaction->type }}
+                                            @switch($transaction->type)
+                                                @case('DEPOSIT')
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-arrow-down me-1"></i>Dépôt
+                                                    </span>
+                                                    @if($transaction->deposit_type)
+                                                        <br><small class="text-muted">{{ $transaction->deposit_type }}</small>
+                                                    @endif
+                                                    @break
+                                                @case('WITHDRAWAL')
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-arrow-up me-1"></i>Retrait
+                                                    </span>
+                                                    @break
+                                                @case('INVESTMENT')
+                                                    <span class="badge bg-primary">
+                                                        <i class="fas fa-chart-line me-1"></i>Investissement
+                                                    </span>
+                                                    @break
+                                                @case('PROFIT')
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-coins me-1"></i>Profit
+                                                    </span>
+                                                    @break
+                                                @case('COMMISSION')
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-handshake me-1"></i>Commission
+                                                    </span>
+                                                    @break
+                                                @case('BONUS')
+                                                    <span class="badge bg-dark">
+                                                        <i class="fas fa-gift me-1"></i>Bonus
                                 </span>
+                                                    @break
+                                                @default
+                                                    <span class="badge bg-light text-dark">{{ $transaction->type }}</span>
+                                            @endswitch
                             </td>
                             <td>
-                                <strong class="text-{{ $transaction->type === 'DEPOSIT' ? 'success' : ($transaction->type === 'WITHDRAWAL' ? 'warning' : 'primary') }}">
+                                            <strong class="{{ $transaction->type === 'WITHDRAWAL' ? 'text-warning' : 'text-success' }}">
                                     ${{ number_format($transaction->amount, 2) }}
                                 </strong>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $transaction->status === 'COMPLETED' ? 'success' : ($transaction->status === 'PENDING' ? 'warning' : 'danger') }}">
-                                    {{ $transaction->status }}
+                                            @switch($transaction->status)
+                                                @case('PENDING')
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-clock me-1"></i>En attente
+                                                    </span>
+                                                    @break
+                                                @case('COMPLETED')
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check me-1"></i>Complété
+                                                    </span>
+                                                    @break
+                                                @case('CANCELLED')
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-times me-1"></i>Annulé
                                 </span>
+                                                    @break
+                                                @default
+                                                    <span class="badge bg-light text-dark">{{ $transaction->status }}</span>
+                                            @endswitch
                             </td>
                             <td>{{ $transaction->description }}</td>
-                            <td>{{ $transaction->created_at->format('d/m/Y H:i') }}</td>
+                                        <td>
+                                            {{ $transaction->created_at->format('d/m/Y H:i') }}
+                                        </td>
                             <td>
                                 <a href="{{ route('transactions.show', $transaction) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-eye"></i>
@@ -81,27 +119,27 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
             <div class="d-flex justify-content-center">
                 {{ $transactions->links() }}
             </div>
         @else
             <div class="text-center py-5">
-                <i class="fas fa-history fa-4x text-muted mb-3"></i>
-                <h5 class="text-muted">Aucune transaction trouvée</h5>
-                <p class="text-muted">Vous n'avez pas encore effectué de transactions.</p>
+                            <i class="fas fa-exchange-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune transaction</h5>
+                            <p class="text-muted">Vos transactions apparaîtront ici.</p>
                 <div class="mt-3">
                     <a href="{{ route('deposit.create') }}" class="btn btn-success me-2">
-                        <i class="fas fa-plus me-2"></i>
-                        Faire un Dépôt
+                                    <i class="fas fa-plus-circle me-2"></i>Déposer
                     </a>
                     <a href="{{ route('investments.create') }}" class="btn btn-primary">
-                        <i class="fas fa-chart-line me-2"></i>
-                        Investir
+                                    <i class="fas fa-chart-line me-2"></i>Investir
                     </a>
                 </div>
             </div>
         @endif
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

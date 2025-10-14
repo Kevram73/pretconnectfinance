@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('investments', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
-            $table->string('plan_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('plan_id');
             $table->decimal('amount', 15, 2);
             $table->decimal('daily_profit', 15, 2)->default(0.00);
             $table->decimal('total_profit', 15, 2)->default(0.00);

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->decimal('balance', 15, 2)->default(0.00);
             $table->decimal('total_deposited', 15, 2)->default(0.00);
             $table->decimal('total_withdrawn', 15, 2)->default(0.00);

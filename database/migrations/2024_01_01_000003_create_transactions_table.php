@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->enum('type', ['DEPOSIT', 'WITHDRAWAL', 'INVESTMENT', 'PROFIT', 'COMMISSION', 'BONUS']);
             $table->decimal('amount', 15, 2);
             $table->string('status')->default('PENDING');

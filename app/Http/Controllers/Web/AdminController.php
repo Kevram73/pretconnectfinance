@@ -15,6 +15,7 @@ use App\Services\CommissionService;
 use App\Services\TeamRewardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
@@ -84,7 +85,7 @@ class AdminController extends Controller
 
         $users = $query->paginate($perPage);
 
-        return view('admin.users', compact('users', 'search', 'role'));
+        return view('admin.users.index', compact('users', 'search', 'role'));
     }
 
     /**
@@ -94,21 +95,22 @@ class AdminController extends Controller
     {
         $user->load(['wallet', 'referrer', 'referrals', 'transactions', 'investments']);
 
-        return view('admin.user', compact('user'));
+        return view('admin.users.show', compact('user'));
     }
 
     /**
-     * Update user.
+     * Store a new user.
      */
-    public function updateUser(Request $request, User $user)
+    public function storeUser(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'sometimes|required|string|max:255',
-            'last_name' => 'sometimes|required|string|max:255',
-            'username' => 'sometimes|required|string|max:255|unique:users,username,' . $user->id,
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'sometimes|required|in:USER,ADMIN',
-            'is_active' => 'sometimes|required|boolean',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:USER,ADMIN',
+            'is_active' => 'required|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -117,10 +119,91 @@ class AdminController extends Controller
                 ->withInput();
         }
 
-        $user->update($request->only(['first_name', 'last_name', 'username', 'email', 'role', 'is_active']));
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'is_active' => $request->is_active,
+            'referral_code' => User::generateReferralCode(),
+        ]);
 
-        return redirect()->back()
-            ->with('success', 'Utilisateur mis à jour avec succès.');
+        // Create wallet for the user
+        $user->wallet()->create([
+            'balance' => 0.00,
+            'total_deposited' => 0.00,
+            'total_withdrawn' => 0.00,
+            'total_invested' => 0.00,
+            'total_profits' => 0.00,
+            'total_commissions' => 0.00,
+        ]);
+
+        return redirect()->route('admin.users')
+            ->with('success', 'Utilisateur créé avec succès.');
+    }
+
+    /**
+     * Update user.
+     */
+    public function updateUser(Request $request, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'role' => 'required|in:USER,ADMIN',
+            'is_active' => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = [
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'role' => $request->role,
+            'is_active' => $request->is_active,
+        ];
+
+        if ($request->password) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.users')
+            ->with('success', 'Utilisateur modifié avec succès.');
+    }
+
+    /**
+     * Delete user.
+     */
+    public function deleteUser(User $user)
+    {
+        if ($user->id === Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Vous ne pouvez pas supprimer votre propre compte.']);
+        }
+
+        $user->delete();
+
+        return response()->json(['success' => true, 'message' => 'Utilisateur supprimé avec succès.']);
+    }
+
+    /**
+     * Show user JSON data.
+     */
+    public function showUser(User $user)
+    {
+        return response()->json($user);
     }
 
     /**

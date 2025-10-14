@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,60 +12,54 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    /**
-     * Show login form.
-     */
     public function showLogin()
     {
-        if (Auth::check()) {
-            return redirect()->route('dashboard');
-        }
-        
         return view('auth.login');
     }
 
-    /**
-     * Handle login.
-     */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
-            'password' => 'required|string',
+            'password' => 'required|string|min:6',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
-                ->withInput($request->except('password'));
+                ->withInput();
         }
 
-        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            
+            if (!$user->is_active) {
+                Auth::logout();
+                return redirect()->back()
+                    ->with('error', 'Votre compte a été désactivé. Contactez l\'administrateur.');
+            }
+
             $request->session()->regenerate();
+            
+            if ($user->isAdmin()) {
+                return redirect()->route('admin.dashboard');
+            }
             
             return redirect()->intended(route('dashboard'));
         }
 
         return redirect()->back()
-            ->withErrors(['email' => 'Les identifiants fournis ne correspondent pas à nos enregistrements.'])
-            ->withInput($request->except('password'));
+            ->with('error', 'Les identifiants fournis ne correspondent pas à nos enregistrements.')
+            ->withInput();
     }
 
-    /**
-     * Show registration form.
-     */
     public function showRegister()
     {
-        if (Auth::check()) {
-            return redirect()->route('dashboard');
-        }
-        
         return view('auth.register');
     }
 
-    /**
-     * Handle registration.
-     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -72,21 +67,28 @@ class AuthController extends Controller
             'last_name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:6|confirmed',
             'referral_code' => 'nullable|string|exists:users,referral_code',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
-                ->withInput($request->except('password', 'password_confirmation'));
+                ->withInput();
         }
 
+        // Vérifier le code de parrainage
         $referrer = null;
         if ($request->referral_code) {
             $referrer = User::where('referral_code', $request->referral_code)->first();
+            if (!$referrer) {
+                return redirect()->back()
+                    ->with('error', 'Code de parrainage invalide.')
+                    ->withInput();
+            }
         }
 
+        // Créer l'utilisateur
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -94,11 +96,14 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'referral_code' => User::generateReferralCode(),
-            'referred_by' => $referrer?->id,
+            'referred_by' => $referrer ? $referrer->id : null,
+            'role' => 'USER',
+            'is_active' => true,
         ]);
 
-        // Create wallet for the user
-        $user->wallet()->create([
+        // Créer le portefeuille
+        Wallet::create([
+            'user_id' => $user->id,
             'balance' => 0.00,
             'total_deposited' => 0.00,
             'total_withdrawn' => 0.00,
@@ -107,23 +112,19 @@ class AuthController extends Controller
             'total_commissions' => 0.00,
         ]);
 
+        // Connecter l'utilisateur
         Auth::login($user);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Compte créé avec succès !');
+            ->with('success', 'Compte créé avec succès ! Bienvenue sur PrêtConnect.');
     }
 
-    /**
-     * Handle logout.
-     */
     public function logout(Request $request)
     {
         Auth::logout();
-        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect()->route('login')
-            ->with('success', 'Vous avez été déconnecté avec succès.');
+        return redirect()->route('login');
     }
 }

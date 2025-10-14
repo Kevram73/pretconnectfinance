@@ -1,149 +1,287 @@
 @extends('layouts.app')
 
-@section('title', 'Faire un Dépôt - PretConnectLoan')
-@section('page-title', 'Faire un Dépôt')
+@section('title', 'Dépôt')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
-    <div class="bg-binance-dark border border-border-color rounded-xl overflow-hidden">
-        <div class="bg-gradient-to-r from-binance-darker to-binance-dark border-b border-border-color p-6">
-            <h5 class="text-xl font-semibold text-text-primary flex items-center">
-                <i class="fas fa-plus mr-3 text-binance-yellow"></i>
-                Nouveau Dépôt
-            </h5>
-        </div>
-        <div class="p-6">
-            <form method="POST" action="{{ route('deposit.store') }}">
-                @csrf
-                
-                <div class="mb-6">
-                    <label for="amount" class="block text-text-primary font-semibold mb-2">Montant du Dépôt (USD)</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span class="text-text-secondary">$</span>
-                        </div>
-                        <input type="number" 
-                               class="w-full bg-binance-darker border border-border-color rounded-lg pl-8 pr-4 py-3 text-text-primary placeholder-text-tertiary focus:border-binance-yellow focus:ring-2 focus:ring-binance-yellow/20 transition-colors @error('amount') border-binance-red @enderror" 
-                               id="amount" name="amount" value="{{ old('amount') }}" 
-                               min="10" step="0.01" placeholder="0.00" required>
-                    </div>
-                    @error('amount')
-                        <div class="text-binance-red text-sm mt-1">{{ $message }}</div>
-                    @enderror
-                    <p class="text-text-secondary text-sm mt-2">Montant minimum: $10.00</p>
-                </div>
-
-                <div class="mb-6">
-                    <label for="payment_method" class="block text-text-primary font-semibold mb-2">Méthode de Paiement</label>
-                    <select class="w-full bg-binance-darker border border-border-color rounded-lg px-4 py-3 text-text-primary focus:border-binance-yellow focus:ring-2 focus:ring-binance-yellow/20 transition-colors @error('payment_method') border-binance-red @enderror" 
-                            id="payment_method" name="payment_method" required>
-                        <option value="">Sélectionnez une méthode</option>
-                        <option value="CRYPTO" {{ old('payment_method') === 'CRYPTO' ? 'selected' : '' }}>
-                            Cryptomonnaie
-                        </option>
-                        <option value="BANK_TRANSFER" {{ old('payment_method') === 'BANK_TRANSFER' ? 'selected' : '' }}>
-                            Virement Bancaire
-                        </option>
-                    </select>
-                    @error('payment_method')
-                        <div class="text-binance-red text-sm mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="mb-6">
-                    <label for="description" class="block text-text-primary font-semibold mb-2">Description (optionnel)</label>
-                    <textarea class="w-full bg-binance-darker border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder-text-tertiary focus:border-binance-yellow focus:ring-2 focus:ring-binance-yellow/20 transition-colors @error('description') border-binance-red @enderror" 
-                              id="description" name="description" rows="3" 
-                              placeholder="Ajoutez une description pour ce dépôt...">{{ old('description') }}</textarea>
-                    @error('description')
-                        <div class="text-binance-red text-sm mt-1">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <!-- Payment Instructions -->
-                <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
-                    <h6 class="text-text-primary font-semibold mb-3 flex items-center">
-                        <i class="fas fa-info-circle mr-2 text-blue-500"></i>Instructions de Paiement
-                    </h6>
-                    <ul class="text-text-secondary text-sm space-y-1">
-                        <li>• Votre dépôt sera traité dans les 24 heures</li>
-                        <li>• Vous recevrez une confirmation par email</li>
-                        <li>• Le montant sera ajouté à votre solde principal après validation</li>
-                    </ul>
-                </div>
-
-                <div class="flex flex-col sm:flex-row gap-4 justify-end">
-                    <a href="{{ route('dashboard') }}" class="bg-binance-gray text-text-primary px-6 py-3 rounded-lg font-medium hover:bg-binance-light-gray transition-colors flex items-center justify-center">
-                        <i class="fas fa-arrow-left mr-2"></i>
-                        Annuler
-                    </a>
-                    <button type="submit" class="bg-binance-green text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center justify-center">
-                        <i class="fas fa-paper-plane mr-2"></i>
-                        Envoyer la Demande
-                    </button>
-                </div>
-            </form>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">
+                    <i class="fas fa-plus-circle me-2"></i>Dépôt de fonds
+                </h4>
+            </div>
         </div>
     </div>
 
-    <!-- Deposit History -->
-    <div class="bg-binance-dark border border-border-color rounded-xl overflow-hidden mt-6">
-        <div class="bg-gradient-to-r from-binance-darker to-binance-dark border-b border-border-color p-6">
-            <h5 class="text-xl font-semibold text-text-primary flex items-center">
-                <i class="fas fa-history mr-3 text-binance-yellow"></i>
-                Historique des Dépôts
-            </h5>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Effectuer un dépôt
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+                        </div>
+                    @endif
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Informations importantes</h6>
+                        <ul class="mb-0">
+                            <li>Minimum de dépôt : <strong>100$</strong></li>
+                            <li>Maximum de dépôt : <strong>100,000$</strong></li>
+                            <li>Votre dépôt sera validé par l'administrateur</li>
+                            <li>Les fonds seront ajoutés à votre portefeuille une fois validés</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST" action="{{ route('deposit.store') }}" enctype="multipart/form-data" id="depositForm">
+                        @csrf
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Type de dépôt</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="deposit_type" 
+                                               id="automatic" value="AUTOMATIC" checked onchange="toggleDepositType()">
+                                        <label class="form-check-label" for="automatic">
+                                            <strong>Dépôt Automatique</strong>
+                                            <br>
+                                            <small class="text-muted">Validation automatique par le système</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="deposit_type" 
+                                               id="manual" value="MANUAL" onchange="toggleDepositType()">
+                                        <label class="form-check-label" for="manual">
+                                            <strong>Dépôt Manuel</strong>
+                                            <br>
+                                            <small class="text-muted">Validation par l'administrateur</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Montant du dépôt ($)</label>
+                            <input type="number" class="form-control @error('amount') is-invalid @enderror" 
+                                   id="amount" name="amount" value="{{ old('amount') }}" 
+                                   min="100" max="100000" step="0.01" required>
+                            @error('amount')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Méthode de paiement</label>
+                            <select class="form-select @error('payment_method') is-invalid @enderror" 
+                                    id="payment_method" name="payment_method" required onchange="updateDepositInfo()">
+                                <option value="">Sélectionnez une méthode</option>
+                                <option value="USDT_BEP20" {{ old('payment_method') == 'USDT_BEP20' ? 'selected' : '' }}>
+                                    USDT BEP20 (Recommandé)
+                                </option>
+                                <option value="USDC_BEP20" {{ old('payment_method') == 'USDC_BEP20' ? 'selected' : '' }}>
+                                    USDC BEP20
+                                </option>
+                                <option value="USDT_TRC20" {{ old('payment_method') == 'USDT_TRC20' ? 'selected' : '' }}>
+                                    USDT TRC20
+                                </option>
+                            </select>
+                            @error('payment_method')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Informations de dépôt (affichées pour le dépôt manuel) -->
+                        <div id="depositInfo" class="mb-3" style="display: none;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Informations de dépôt</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Adresse de dépôt</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="depositAddress" readonly>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('depositAddress')">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">QR Code</label>
+                                            <div class="text-center">
+                                                <div id="qrCode" class="border p-3">
+                                                    <p class="text-muted">Sélectionnez une méthode de paiement</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="transaction_hash" class="form-label">Hash de la transaction</label>
+                            <input type="text" class="form-control @error('transaction_hash') is-invalid @enderror" 
+                                   id="transaction_hash" name="transaction_hash" value="{{ old('transaction_hash') }}" 
+                                   placeholder="Entrez le hash de votre transaction" required>
+                            @error('transaction_hash')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Copiez le hash de la transaction depuis votre wallet
+                            </small>
+                        </div>
+
+                        <!-- Capture d'écran (optionnelle pour le dépôt manuel) -->
+                        <div id="screenshotSection" class="mb-3" style="display: none;">
+                            <label for="screenshot" class="form-label">Capture d'écran (optionnel)</label>
+                            <input type="file" class="form-control @error('screenshot') is-invalid @enderror" 
+                                   id="screenshot" name="screenshot" accept="image/*">
+                            @error('screenshot')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Ajoutez une capture d'écran de votre transaction pour faciliter la validation
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Soumettre le dépôt
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="p-6">
-            @php
-                $deposits = auth()->user()->transactions()->deposits()->latest()->limit(5)->get();
-            @endphp
-            
-            @if($deposits->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-border-color">
-                                <th class="text-left py-3 px-4 text-text-secondary font-medium">Montant</th>
-                                <th class="text-left py-3 px-4 text-text-secondary font-medium">Méthode</th>
-                                <th class="text-left py-3 px-4 text-text-secondary font-medium">Statut</th>
-                                <th class="text-left py-3 px-4 text-text-secondary font-medium">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($deposits as $deposit)
-                            <tr class="border-b border-border-color/50 hover:bg-binance-darker/50 transition-colors">
-                                <td class="py-3 px-4">
-                                    <span class="text-binance-green font-semibold">
-                                        ${{ number_format($deposit->amount, 2) }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4 text-text-secondary">{{ $deposit->payment_method }}</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        {{ $deposit->status === 'COMPLETED' ? 'bg-green-500/10 text-green-500' : 
-                                           ($deposit->status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-500' : 'bg-red-500/10 text-red-500') }}">
-                                        {{ $deposit->status }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4 text-text-secondary">{{ $deposit->created_at->format('d/m/Y H:i') }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-wallet me-2"></i>Votre portefeuille
+                    </h5>
                 </div>
-                <div class="text-center mt-4">
-                    <a href="{{ route('transactions', ['type' => 'DEPOSIT']) }}" class="bg-binance-yellow/10 border border-binance-yellow/30 text-binance-yellow px-4 py-2 rounded-lg text-sm font-medium hover:bg-binance-yellow/20 transition-colors">
-                        Voir tous les dépôts
-                    </a>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary mb-1">${{ number_format($wallet->balance, 2) }}</h4>
+                                <small class="text-muted">Solde actuel</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success mb-1">${{ number_format($wallet->total_deposited, 2) }}</h4>
+                            <small class="text-muted">Total déposé</small>
+                        </div>
+                    </div>
                 </div>
-            @else
-                <div class="text-center py-8">
-                    <i class="fas fa-history text-4xl text-text-tertiary mb-4"></i>
-                    <p class="text-text-secondary">Aucun dépôt effectué</p>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Types de dépôt
+                    </h5>
                 </div>
-            @endif
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-robot me-2"></i>Dépôt Automatique</h6>
+                        <p class="small text-muted">Le système valide automatiquement votre dépôt après vérification de la blockchain.</p>
+                    </div>
+                    
+                    <div class="mb-0">
+                        <h6><i class="fas fa-user-check me-2"></i>Dépôt Manuel</h6>
+                        <p class="small text-muted">Un administrateur valide manuellement votre dépôt. Plus sécurisé mais plus lent.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+// Adresses de dépôt
+const depositAddresses = {
+    'USDT_BEP20': '0x280Cf95cC70600c4d4883600CA908324F963e7d5',
+    'USDC_BEP20': '0x280Cf95cC70600c4d4883600CA908324F963e7d5',
+    'USDT_TRC20': 'TPfkAE4M5g9h6wrkndnErNC8v5RSAZeCBk'
+};
+
+// QR Codes (en réalité, vous devriez générer des vrais QR codes)
+const qrCodes = {
+    'USDT_BEP20': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5VU0RUIEJFUDA8L3RleHQ+PC9zdmc+',
+    'USDC_BEP20': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5VU0RDIEJFUDA8L3RleHQ+PC9zdmc+',
+    'USDT_TRC20': 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2ZmZiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5VU0RUIE1UQzA8L3RleHQ+PC9zdmc+'
+};
+
+function toggleDepositType() {
+    const manualDeposit = document.getElementById('manual').checked;
+    const depositInfo = document.getElementById('depositInfo');
+    const screenshotSection = document.getElementById('screenshotSection');
+    
+    if (manualDeposit) {
+        depositInfo.style.display = 'block';
+        screenshotSection.style.display = 'block';
+        updateDepositInfo();
+    } else {
+        depositInfo.style.display = 'none';
+        screenshotSection.style.display = 'none';
+    }
+}
+
+function updateDepositInfo() {
+    const paymentMethod = document.getElementById('payment_method').value;
+    const depositAddress = document.getElementById('depositAddress');
+    const qrCode = document.getElementById('qrCode');
+    
+    if (paymentMethod && depositAddresses[paymentMethod]) {
+        depositAddress.value = depositAddresses[paymentMethod];
+        qrCode.innerHTML = `<img src="${qrCodes[paymentMethod]}" alt="QR Code" class="img-fluid">`;
+    } else {
+        depositAddress.value = '';
+        qrCode.innerHTML = '<p class="text-muted">Sélectionnez une méthode de paiement</p>';
+    }
+}
+
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.select();
+    document.execCommand('copy');
+    
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.remove('btn-outline-secondary');
+    button.classList.add('btn-success');
+    
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+
+// Initialiser l'affichage
+document.addEventListener('DOMContentLoaded', function() {
+    toggleDepositType();
+});
+</script>
 @endsection

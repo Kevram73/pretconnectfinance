@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('commissions', function (Blueprint $table) {
             $table->id();
-            $table->string('user_id');
-            $table->string('referrer_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('referrer_id');
             $table->decimal('amount', 15, 2);
             $table->decimal('percentage', 5, 2);
             $table->enum('type', ['REFERRAL', 'TEAM_REWARD', 'BONUS'])->default('REFERRAL');

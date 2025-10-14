@@ -3,195 +3,144 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Plan;
-use App\Models\Transaction;
+use App\Models\Commission;
 use App\Models\Investment;
-use App\Services\InvestmentService;
-use App\Services\CommissionService;
-use App\Services\TeamRewardService;
+use App\Models\MultiLevelCommission;
+use App\Models\TeamReward;
+use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
-    protected $investmentService;
-    protected $commissionService;
-    protected $teamRewardService;
-
-    public function __construct(
-        InvestmentService $investmentService,
-        CommissionService $commissionService,
-        TeamRewardService $teamRewardService
-    ) {
-        $this->investmentService = $investmentService;
-        $this->commissionService = $commissionService;
-        $this->teamRewardService = $teamRewardService;
-    }
-
-    /**
-     * Show user dashboard.
-     */
     public function index()
     {
         $user = Auth::user();
-        $user->load('wallet');
+        $wallet = $user->wallet;
+        
+        // Statistiques du portefeuille
+        $stats = [
+            'balance' => $wallet->balance,
+            'total_deposited' => $wallet->total_deposited,
+            'total_withdrawn' => $wallet->total_withdrawn,
+            'total_invested' => $wallet->total_invested,
+            'total_profits' => $wallet->total_profits,
+            'total_commissions' => $wallet->total_commissions,
+        ];
 
-        // Get user statistics
-        $investmentStats = $this->investmentService->getUserInvestmentStats($user);
-        $commissionStats = $this->commissionService->getUserCommissionStats($user);
-        $teamRewardStats = $this->teamRewardService->getUserTeamRewardStats($user);
-
-        // Get recent transactions
-        $recentTransactions = $user->transactions()
-            ->latest()
-            ->limit(10)
-            ->get();
-
-        // Get active investments
-        $activeInvestments = $user->investments()
-            ->active()
+        // Investissements actifs
+        $activeInvestments = Investment::where('user_id', $user->id)
+            ->where('status', 'ACTIVE')
             ->with('plan')
             ->get();
 
-        // Get available plans
-        $availablePlans = Plan::active()->get();
+        // Transactions récentes
+        $recentTransactions = Transaction::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
 
-        return view('dashboard.index', compact(
-            'user',
-            'investmentStats',
-            'commissionStats',
-            'teamRewardStats',
-            'recentTransactions',
-            'activeInvestments',
-            'availablePlans'
-        ));
+        // Commissions récentes
+        $recentCommissions = Commission::where('referrer_id', $user->id)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('dashboard.index', compact('stats', 'activeInvestments', 'recentTransactions', 'recentCommissions'));
     }
 
-    /**
-     * Show transactions page.
-     */
-    public function transactions(Request $request)
+    public function transactions()
     {
         $user = Auth::user();
-        $perPage = 15;
-        $type = $request->get('type');
-        $status = $request->get('status');
+        $transactions = Transaction::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
-        $query = $user->transactions()->latest();
-
-        if ($type) {
-            $query->where('type', $type);
-        }
-
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        $transactions = $query->paginate($perPage);
-
-        return view('dashboard.transactions', compact('transactions', 'type', 'status'));
+        return view('dashboard.transactions', compact('transactions'));
     }
 
-    /**
-     * Show investments page.
-     */
-    public function investments(Request $request)
+    public function investments()
     {
         $user = Auth::user();
-        $perPage = 15;
-        $status = $request->get('status');
+        $investments = Investment::where('user_id', $user->id)
+            ->with('plan')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
-        $query = $user->investments()->with('plan')->latest();
-
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        $investments = $query->paginate($perPage);
-
-        return view('dashboard.investments', compact('investments', 'status'));
+        return view('dashboard.investments', compact('investments'));
     }
 
-    /**
-     * Show commissions page.
-     */
     public function commissions()
     {
         $user = Auth::user();
-        
-        $referralCommissions = $user->commissions()
+        $commissions = Commission::where('referrer_id', $user->id)
             ->with('user')
-            ->latest()
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
-        $multiLevelCommissions = $user->multiLevelCommissions()
+        $multiLevelCommissions = MultiLevelCommission::where('referrer_id', $user->id)
             ->with('user')
-            ->latest()
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
-        $commissionStats = $this->commissionService->getUserCommissionStats($user);
-
-        return view('dashboard.commissions', compact(
-            'referralCommissions',
-            'multiLevelCommissions',
-            'commissionStats'
-        ));
+        return view('dashboard.commissions', compact('commissions', 'multiLevelCommissions'));
     }
 
-    /**
-     * Show team rewards page.
-     */
     public function teamRewards()
     {
         $user = Auth::user();
-        
-        $teamRewards = $user->teamRewards()
-            ->orderBy('level')
+        $teamRewards = TeamReward::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        $teamRewardStats = $this->teamRewardService->getUserTeamRewardStats($user);
-
-        return view('dashboard.team-rewards', compact('teamRewards', 'teamRewardStats'));
+        return view('dashboard.team-rewards', compact('teamRewards'));
     }
 
-    /**
-     * Show referrals page.
-     */
     public function referrals()
     {
         $user = Auth::user();
         
+        // Statistiques de parrainage
+        $referralStats = [
+            'total_referrals' => $user->referrals()->count(),
+            'active_referrals' => $user->referrals()->where('is_active', true)->count(),
+            'total_commission_earned' => Commission::where('referrer_id', $user->id)->sum('amount'),
+        ];
+
+        // Liste des filleuls
         $referrals = $user->referrals()
             ->with('wallet')
-            ->latest()
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        // Commissions par niveau
+        $commissionByLevel = MultiLevelCommission::where('referrer_id', $user->id)
+            ->selectRaw('level, SUM(amount) as total_amount, COUNT(*) as count')
+            ->groupBy('level')
             ->get();
 
-        return view('dashboard.referrals', compact('referrals'));
+        return view('dashboard.referrals', compact('referralStats', 'referrals', 'commissionByLevel'));
     }
 
-    /**
-     * Show profile page.
-     */
     public function profile()
     {
         $user = Auth::user();
-        $user->load('wallet');
-
         return view('dashboard.profile', compact('user'));
     }
 
-    /**
-     * Update profile.
-     */
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
-
+        
         $validator = Validator::make($request->all(), [
-            'first_name' => 'sometimes|required|string|max:255',
-            'last_name' => 'sometimes|required|string|max:255',
-            'username' => 'sometimes|required|string|max:255|unique:users,username,' . $user->id,
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
         ]);
 
         if ($validator->fails()) {
@@ -200,20 +149,21 @@ class DashboardController extends Controller
                 ->withInput();
         }
 
-        $user->update($request->only(['first_name', 'last_name', 'username', 'email']));
+        $user->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'username' => $request->username,
+            'email' => $request->email,
+        ]);
 
-        return redirect()->back()
-            ->with('success', 'Profil mis à jour avec succès.');
+        return redirect()->back()->with('success', 'Profil mis à jour avec succès !');
     }
 
-    /**
-     * Change password.
-     */
     public function changePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'current_password' => 'required|string',
-            'password' => 'required|string|min:8|confirmed',
+            'current_password' => 'required',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -225,14 +175,13 @@ class DashboardController extends Controller
 
         if (!Hash::check($request->current_password, $user->password)) {
             return redirect()->back()
-                ->withErrors(['current_password' => 'Le mot de passe actuel est incorrect.']);
+                ->with('error', 'Le mot de passe actuel est incorrect.');
         }
 
         $user->update([
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->back()
-            ->with('success', 'Mot de passe modifié avec succès.');
+        return redirect()->back()->with('success', 'Mot de passe modifié avec succès !');
     }
 }

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('referral_code')->unique();
-            $table->string('referred_by')->nullable();
+            $table->unsignedBigInteger('referred_by')->nullable();
             $table->enum('role', ['USER', 'ADMIN'])->default('USER');
             $table->boolean('is_active')->default(true);
             $table->rememberToken();

@@ -13,6 +13,7 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'type',
+        'deposit_type',
         'amount',
         'status',
         'description',
@@ -20,6 +21,8 @@ class Transaction extends Model
         'transaction_hash',
         'payment_method',
         'payment_hash',
+        'screenshot_path',
+        'admin_notes',
     ];
 
     protected $casts = [
